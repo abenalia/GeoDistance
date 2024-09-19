@@ -43,9 +43,6 @@ application {
    // Define the main class for the application.
    // TODO: specify the fully qualified name of the class 
    //       that contains the main method your would like to run.
-    mainClass = 'edu.vanier.controllers.PostalCodeController'
-    mainClass = 'edu.vanier.models.PostalCode'
     mainClass = 'edu.vanier.tests.Driver'
-    mainClass = 'edu.vanier.ui.MainApp'
 }
  

@@ -1,8 +1,7 @@
 package edu.vanier.tests;
 
-public class Driver {
+import edu.vanier.controllers.PostalCodeController;
 
-    public static void main(String[] args) {
-        System.out.println("Hello from Driver!");
-    }
+public class Driver {
+    
 }
