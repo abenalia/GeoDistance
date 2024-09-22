@@ -13,13 +13,13 @@ public class PostalCodeController {
         System.out.println("Hello from Driver!");
     }
 
-    public parse(){}
-
-    public distanceTo(from, to){}
-
-    public nearbyLocations(from){}
-
-    public static void main(String[] args) {
-        System.out.println("Hello PostalCodeController!");
-    }
+//    public parse(){}
+//
+//    public distanceTo(from, to){}
+//
+//    public nearbyLocations(from){}
+//
+//    public static void main(String[] args) {
+//        System.out.println("Hello PostalCodeController!");
+//    }
 }
