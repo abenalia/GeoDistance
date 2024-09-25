@@ -5,16 +5,16 @@ public class PostalCode {
     private String country;
     private String postalCode;
     private String province;
+    private String city;
     private double latitude;
     private double longitude;
 
-    public PostalCode() {}
-
-    public PostalCode(String id, String country, String postalCode, String province, double latitude, double longitude) {
+    public PostalCode(String id, String country, String postalCode, String province, String city, double latitude, double longitude) {
         this.id = id;
         this.country = country;
         this.postalCode = postalCode;
         this.province = province;
+        this.city = city;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -49,6 +49,14 @@ public class PostalCode {
 
     public void setProvince(String province) {
         this.province = province;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public double getLatitude() {
