@@ -1,11 +1,11 @@
 package edu.vanier.ui;
 
-
 import edu.vanier.controllers.MainAppFXMLController;
 import edu.vanier.controllers.PostalCodeController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 
@@ -16,10 +16,12 @@ public class MainApp extends Application {
     }
 
     public void start (Stage primaryStage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/MainView.fxml"));
-        loader.setController(new MainAppFXMLController());
-
+        FXMLLoader loader = new FXMLLoader(
+                MainApp.class.getResource("/fxml/MainView.fxml"));
         Parent root = (Parent) loader.load();
-
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("My JavaFX Application");
+        primaryStage.show();
     }
 }
