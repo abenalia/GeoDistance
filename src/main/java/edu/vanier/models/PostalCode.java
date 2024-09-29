@@ -13,8 +13,8 @@ public class PostalCode {
         this.id = id;
         this.country = country;
         this.postalCode = postalCode;
-        this.province = province;
         this.city = city;
+        this.province = province;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -79,5 +79,18 @@ public class PostalCode {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    @Override
+    public String toString() {
+        return "PostalCode{" +
+                "id='" + id + '\'' +
+                ", country='" + country + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                ", city='" + city + '\'' +
+                ", province='" + province + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                '}';
     }
 }

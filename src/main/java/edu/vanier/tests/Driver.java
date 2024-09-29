@@ -11,43 +11,104 @@ public class Driver {
         String csvFilePath = "src/main/resources/postalcodes.csv";
 
         PostalCodeController controller = new PostalCodeController(csvFilePath);
-        
+
+        // Explicitly call the parse() method to parse the CSV file
+        controller.parse();
+
+        // Run the testParse method to test the parsing functionality
         testParse(controller);
         testDistanceTo(controller);
-        testNearbyLocations(controller,"X0G");
+        testNearbyLocations(controller,"E2E");
     }
     public static void testParse(PostalCodeController controller) {
         System.out.println("Testing parse() method...");
 
-        HashMap<String, PostalCode> postalCodes = controller.getPostalCodes();
-
-        if (postalCodes.isEmpty()) {
+        // Check if the map is not empty
+        if (controller.getPostalCodes().isEmpty()) {
             System.out.println("Test Failed: No postal codes were parsed. The map is empty.");
             return;
         } else {
             System.out.println("Test Passed: Postal codes were successfully parsed.");
         }
 
-        System.out.println("Total postal codes parsed: " + postalCodes.size());
+        // Validate all parsed data
+        controller.validateParsedData();
 
-        System.out.println("\nChecking specific postal codes...");
-        String[] testPostalCodes = {"Y1A", "V5K", "H0H"};
+        // Check the total number of postal codes parsed
+        System.out.println("Total number of postal codes parsed: " + controller.getPostalCodes().size());
 
-        for (String code : testPostalCodes) {
-            if (postalCodes.containsKey(code)) {
-                System.out.println("Test Passed: Postal code " + code + " exists in the map.");
+        // Test case 1: Check if specific postal codes exist
+        System.out.println("\nTest Case 1: Check for specific postal codes");
+        String[] testPostalCodes = {"E2E", "Y1A", "V5K", "K0H"}; // Add more postal codes as needed
+        for (String postalCode : testPostalCodes) {
+            if (controller.getPostalCodes().containsKey(postalCode)) {
+                System.out.println("Test Passed: Postal code " + postalCode + " exists.");
             } else {
-                System.out.println("Test Failed: Postal code " + code + " is missing from the map.");
+                System.out.println("Test Failed: Postal code " + postalCode + " is missing.");
             }
+        }
+
+        // Test case 2: Validate specific postal code data
+        System.out.println("\nTest Case 2: Validate specific postal code data for 'E2E'");
+        PostalCode sampleCode = controller.getPostalCodes().get("E2E");
+        if (sampleCode != null) {
+            // Check if all fields match expected values
+            String expectedCity = "Rothesay, Quispamsis";
+            String expectedProvince = "NB";
+            double expectedLatitude = 45.4165;
+            double expectedLongitude = -65.9913;
+
+            boolean isCityCorrect = sampleCode.getCity().equals(expectedCity);
+            boolean isProvinceCorrect = sampleCode.getProvince().equals(expectedProvince);
+            boolean isLatitudeCorrect = sampleCode.getLatitude() == expectedLatitude;
+            boolean isLongitudeCorrect = sampleCode.getLongitude() == expectedLongitude;
+
+            if (isCityCorrect && isProvinceCorrect && isLatitudeCorrect && isLongitudeCorrect) {
+                System.out.println("Test Passed: Postal code 'E2E' data is correct.");
+            } else {
+                System.out.println("Test Failed: Postal code 'E2E' data is incorrect.");
+                System.out.println("Actual Data: " + sampleCode);
+                System.out.printf("Expected: City='%s', Province='%s', Latitude=%.4f, Longitude=%.4f%n",
+                        expectedCity, expectedProvince, expectedLatitude, expectedLongitude);
+            }
+        } else {
+            System.out.println("Test Failed: Postal code 'E2E' not found.");
+        }
+
+        // Test case 3: Verify if a non-existent postal code is handled correctly
+        System.out.println("\nTest Case 3: Check for non-existent postal code 'XYZ'");
+        PostalCode nonExistentCode = controller.getPostalCodes().get("XYZ");
+        if (nonExistentCode == null) {
+            System.out.println("Test Passed: Non-existent postal code 'XYZ' is not found, as expected.");
+        } else {
+            System.out.println("Test Failed: Non-existent postal code 'XYZ' should not exist.");
+        }
+
+        // Test case 4: Validate postal code with complex city name
+        System.out.println("\nTest Case 4: Validate complex city name for 'K0H'");
+        PostalCode complexCode = controller.getPostalCodes().get("K0H");
+        if (complexCode != null) {
+            String expectedComplexCity = "Frontenac County, Addington County, Loyalist Shores and Southwest Leeds (Inverary)";
+            String expectedComplexProvince = "ON";
+            if (complexCode.getCity().equals(expectedComplexCity) && complexCode.getProvince().equals(expectedComplexProvince)) {
+                System.out.println("Test Passed: Complex city name for 'K0H' is correct.");
+            } else {
+                System.out.println("Test Failed: Complex city name for 'K0H' is incorrect.");
+                System.out.println("Actual Data: " + complexCode);
+                System.out.printf("Expected: City='%s', Province='%s'%n", expectedComplexCity, expectedComplexProvince);
+            }
+        } else {
+            System.out.println("Test Failed: Postal code 'K0H' not found.");
         }
 
         System.out.println("\ntestParse() method completed.");
     }
 
+
     public static void testDistanceTo(PostalCodeController controller){
         // 1. Valid Input Test
         System.out.println("Valid Input Test:");
-        controller.distanceTo("H1E", "H1M");
+        controller.distanceTo("H1E", "J7C");
 
         // 2. Invalid Postal Codes Test
         System.out.println("\nInvalid Postal Codes Test:");
