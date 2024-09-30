@@ -7,8 +7,10 @@ import edu.vanier.models.PostalCode;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class PostalCodeController {
     private final HashMap<String, PostalCode> postalCodes = new HashMap<>();
@@ -109,11 +111,8 @@ public class PostalCodeController {
     }
 
     private String[] fixCsvLine(String[] line) {
-        // Debugging: Print the original problematic line for debugging
-        System.out.println("Original line with incorrect columns: " + Arrays.toString(line));
-
         if (line.length > 7) {
-            // Start with the initial city name (column 4, index 3)
+            // Combine all fields from the 4th field (index 3) to the third-to-last field into a single city name
             StringBuilder cityBuilder = new StringBuilder(line[3]);
 
             // Merge fields into the city name until we reach the last three fields (province, latitude, longitude)
@@ -127,12 +126,9 @@ public class PostalCodeController {
             fixedLine[1] = line[1];  // country
             fixedLine[2] = line[2];  // postalCode
             fixedLine[3] = cityBuilder.toString();  // merged city field
-            fixedLine[4] = line[line.length - 3].trim();  // province
+            fixedLine[4] = line[line.length - 3];  // province
             fixedLine[5] = line[line.length - 2];  // latitude
             fixedLine[6] = line[line.length - 1];  // longitude
-
-            // Debugging: Print the corrected line for debugging
-            System.out.println("Corrected line: " + Arrays.toString(fixedLine));
 
             return fixedLine;
         }
@@ -141,13 +137,13 @@ public class PostalCodeController {
         return line;
     }
 
-    public void distanceTo(String from, String to){
+    public double distanceTo(String from, String to) {
         PostalCode fromCode = postalCodes.get(from);
         PostalCode toCode = postalCodes.get(to);
 
         if (fromCode == null || toCode == null) {
             System.out.println("One or both of the postal codes do not exist in the database.");
-            return;
+            return -1; // Return an invalid distance if postal codes are not found
         }
 
         double latitude1 = fromCode.getLatitude();
@@ -157,26 +153,26 @@ public class PostalCodeController {
 
         double distance = haversine(latitude1, longitude1, latitude2, longitude2);
 
-        System.out.printf("The distance between %s and %s is %.2f km.%n", from, to, distance);
+        return distance; // Return the calculated distance
     }
 
-    public void nearbyLocations(String from, int radius){
+    public List<String> nearbyLocations(String from, int radius) {
+        List<String> results = new ArrayList<>();
         PostalCode fromPostalCode = postalCodes.get(from);
 
         if (fromPostalCode == null) {
-            System.out.println("The postal codes do not exist in the database.");
-            return;
+            results.add("The postal code does not exist in the database.");
+            return results;
         }
 
         double latitude1 = fromPostalCode.getLatitude();
         double longitude1 = fromPostalCode.getLongitude();
 
-        System.out.printf("Locations within %d km of postal code %s:%n", radius, from);
         boolean foundNearby = false;
 
         for (PostalCode toPostalCode : postalCodes.values()) {
             if (toPostalCode.getPostalCode().equals(from)) {
-                continue;
+                continue;  // Skip the same postal code
             }
 
             double latitude2 = toPostalCode.getLatitude();
@@ -186,15 +182,16 @@ public class PostalCodeController {
 
             if (distance <= radius) {
                 foundNearby = true;
-                System.out.printf("Postal Code: %s, City: %s, Province: %s, Distance: %.2f km%n",
-                        toPostalCode.getPostalCode(), toPostalCode.getCity(), toPostalCode.getProvince(), distance);
+                results.add(String.format("Postal Code: %-3s | Province: %-2s | City: %-10s | Distance: %1.2f km",
+                        toPostalCode.getPostalCode(), toPostalCode.getCity(), toPostalCode.getProvince(), distance));
             }
         }
 
         if (!foundNearby) {
-            System.out.println("No locations found within the specified radius.");
+            results.add("No locations found within the specified radius.");
         }
 
+        return results;
     }
 
     public HashMap<String, PostalCode> getPostalCodes() {

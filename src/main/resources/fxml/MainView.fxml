@@ -1,12 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.vanier.controllers.MainAppFXMLController">
-   <children>
+   <!-- Main View Pane -->
+   <AnchorPane fx:id="mainView" visible="true">
       <Button layoutX="126.0" layoutY="60.0" mnemonicParsing="false" onAction="#switchToDistanceForm" text="Compute Distance" />
       <Button layoutX="320.0" layoutY="61.0" mnemonicParsing="false" onAction="#switchToNearbyLocationsForm" text="Nearby Locations" />
-   </children>
+
+      <!-- Label to display distance calculation results -->
+      <Label fx:id="resultLabel" layoutX="50.0" layoutY="120.0" text="" />
+
+      <!-- Scrollable area to display the results of nearby locations -->
+      <ScrollPane layoutX="50.0" layoutY="150.0" prefHeight="200.0" prefWidth="500.0">
+         <TextArea fx:id="resultsArea" editable="false" wrapText="true" prefWidth="500.0" prefHeight="200.0"/>
+      </ScrollPane>
+   </AnchorPane>
+
+   <!-- Distance Form Pane -->
+   <AnchorPane fx:id="distanceForm" visible="false">
+      <Label layoutX="38.0" layoutY="38.0" text="Postal Code 1:" />
+      <TextField fx:id="postalCodeField1" layoutX="150.0" layoutY="32.0" />
+
+      <Label layoutX="38.0" layoutY="84.0" text="Postal Code 2:" />
+      <TextField fx:id="postalCodeField2" layoutX="150.0" layoutY="78.0" />
+
+      <Button layoutX="38.0" layoutY="126.0" text="Submit" onAction="#submitDistanceForm" />
+      <Button layoutX="156.0" layoutY="126.0" text="Cancel" onAction="#switchToMainView" />
+   </AnchorPane>
+
+   <!-- Nearby Locations Form Pane -->
+   <AnchorPane fx:id="nearbyLocationForm" visible="false">
+      <Label layoutX="38.0" layoutY="38.0" text="Postal Code:" />
+      <TextField fx:id="postalCodeFieldNearby" layoutX="150.0" layoutY="32.0" />
+
+      <Label layoutX="38.0" layoutY="84.0" text="Radius:" />
+      <ChoiceBox fx:id="radiusChoiceBox" layoutX="150.0" layoutY="78.0" prefWidth="160.0"/>
+
+      <Button layoutX="38.0" layoutY="126.0" text="Submit" onAction="#submitNearbyLocationsForm" />
+      <Button layoutX="156.0" layoutY="126.0" text="Cancel" onAction="#switchToMainView" />
+   </AnchorPane>
 </AnchorPane>

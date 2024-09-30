@@ -21,7 +21,7 @@ public class MainApp extends Application {
         Parent root = (Parent) loader.load();
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("My JavaFX Application");
+        primaryStage.setTitle("GeoDistance");
         primaryStage.show();
     }
 }
