@@ -1,10 +1,12 @@
 package edu.vanier.controllers;
 
+import edu.vanier.models.PostalCode;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 import java.util.List;
@@ -26,10 +28,19 @@ public class MainAppFXMLController {
     @FXML
     private Label resultLabel; // Label to display the result
     @FXML
-    private TextArea resultsArea; // TextArea to display nearby locations results
-    @FXML
     private ChoiceBox<Integer> radiusChoiceBox; // ChoiceBox for selecting the radius
     private PostalCodeController controller;
+    @FXML
+    private TableView<PostalCode> locationsTableView;
+    @FXML
+    private TableColumn<PostalCode, String> postalCodeColumn;
+    @FXML
+    private TableColumn<PostalCode, String> cityColumn;
+    @FXML
+    private TableColumn<PostalCode, String> provinceColumn;
+    @FXML
+    private TableColumn<PostalCode, Double> distanceColumn;
+
 
     // Initialize controller
     @FXML
@@ -42,18 +53,26 @@ public class MainAppFXMLController {
         // Populate the radius choice box with predefined values
         radiusChoiceBox.getItems().addAll(5, 10, 15, 25, 50, 100, 500, 1000, 2000, 5000, 10000);
         radiusChoiceBox.setValue(10);  // Set a default value
+
+        postalCodeColumn.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+        cityColumn.setCellValueFactory(new PropertyValueFactory<>("city"));
+        provinceColumn.setCellValueFactory(new PropertyValueFactory<>("province"));
+        distanceColumn.setCellValueFactory(new PropertyValueFactory<>("distanceToReference"));
+
+        // Hide the TableView initially
+        locationsTableView.setVisible(false);
     }
 
     // Switch to Distance Form
     @FXML
-    private void switchToDistanceForm() {
+    private void switchToDistanceForm(ActionEvent event) {
         mainView.setVisible(false);
         distanceForm.setVisible(true);
     }
 
     // Switch back to Main View
     @FXML
-    private void switchToMainView() {
+    private void switchToMainView(ActionEvent event) {
         mainView.setVisible(true);
         distanceForm.setVisible(false);
         nearbyLocationForm.setVisible(false);
@@ -61,7 +80,7 @@ public class MainAppFXMLController {
 
     // Handle Submit for Distance Form
     @FXML
-    private void submitDistanceForm() {
+    private void submitDistanceForm(ActionEvent event) {
         String postalCode1 = postalCodeField1.getText().trim();
         String postalCode2 = postalCodeField2.getText().trim();
 
@@ -89,19 +108,19 @@ public class MainAppFXMLController {
         }
 
         // Switch back to the main view and display results
-        switchToMainView();
+        switchToMainView(event);
     }
 
     // Switch to Nearby Locations Form
     @FXML
-    private void switchToNearbyLocationsForm() {
+    private void switchToNearbyLocationsForm(ActionEvent event) {
         mainView.setVisible(false);
         nearbyLocationForm.setVisible(true);
     }
 
     // Handle Submit for Nearby Locations Form
     @FXML
-    private void submitNearbyLocationsForm() {
+    private void submitNearbyLocationsForm(ActionEvent event) {
         String postalCode = postalCodeFieldNearby.getText().trim();
         Integer radius = radiusChoiceBox.getValue();
 
@@ -110,21 +129,33 @@ public class MainAppFXMLController {
 
         // Validate postal code and radius
         if (postalCode.isEmpty()) {
-            resultsArea.setText("Please enter a postal code.");
+            resultLabel.setText("Please enter a postal code.");
         } else if (!postalCode.matches(postalCodePattern)) {
-            resultsArea.setText("Postal code is invalid. Format must be Letter-Digit-Letter (e.g., H1E).");
+            resultLabel.setText("Postal code is invalid. Format must be Letter-Digit-Letter (e.g., H1E).");
         } else if (radius == null) {
-            resultsArea.setText("Please select a radius.");
+            resultLabel.setText("Please select a radius.");
         } else {
             // Use the nearbyLocations method from PostalCodeController to get nearby locations
-            List<String> nearbyLocationsResults = controller.nearbyLocations(postalCode, radius);
+            List<PostalCode> nearbyLocationsResults = controller.nearbyLocations(postalCode, radius);
 
-            // Display the results in the resultsArea TextArea
-            resultsArea.clear();
-            nearbyLocationsResults.forEach(result -> resultsArea.appendText(result + "\n"));
+            if (nearbyLocationsResults.isEmpty()) {
+                resultLabel.setText("No locations found within the specified radius.");
+                locationsTableView.setItems(null);
+            } else {
+                // Update the distanceToReference for each PostalCode
+                for (PostalCode pc : nearbyLocationsResults) {
+                    double distance = controller.distanceTo(postalCode, pc.getPostalCode());
+                    pc.setDistanceToReference(distance);
+                }
+
+                ObservableList<PostalCode> data = FXCollections.observableArrayList(nearbyLocationsResults);
+                locationsTableView.setItems(data);
+                resultLabel.setText(""); // Clear any previous messages
+                locationsTableView.setVisible(true); // Show the TableView
+            }
         }
 
-        // Switch back to the main view if needed
-        switchToMainView();
+        // Switch back to the main view
+        switchToMainView(event);
     }
 }

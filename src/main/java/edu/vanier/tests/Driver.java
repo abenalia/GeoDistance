@@ -104,32 +104,49 @@ public class Driver {
 
         // Test with a small radius (10 km)
         System.out.println("\nTest 1: Small Radius (10 km)");
-        List<String> resultsSmallRadius = controller.nearbyLocations(from, 10);
-        resultsSmallRadius.forEach(System.out::println);
+        List<PostalCode> resultsSmallRadius = controller.nearbyLocations(from, 10);
+        printPostalCodeList(resultsSmallRadius);
 
         // Test with a moderate radius (50 km)
         System.out.println("\nTest 2: Moderate Radius (50 km)");
-        List<String> resultsModerateRadius = controller.nearbyLocations(from, 50);
-        resultsModerateRadius.forEach(System.out::println);
+        List<PostalCode> resultsModerateRadius = controller.nearbyLocations(from, 50);
+        printPostalCodeList(resultsModerateRadius);
 
         // Test with a large radius (200 km)
         System.out.println("\nTest 3: Large Radius (200 km)");
-        List<String> resultsLargeRadius = controller.nearbyLocations(from, 200);
-        resultsLargeRadius.forEach(System.out::println);
+        List<PostalCode> resultsLargeRadius = controller.nearbyLocations(from, 200);
+        printPostalCodeList(resultsLargeRadius);
 
         // Test with a very large radius (1000 km) to cover a larger area
         System.out.println("\nTest 4: Very Large Radius (1000 km)");
-        List<String> resultsVeryLargeRadius = controller.nearbyLocations(from, 1000);
-        resultsVeryLargeRadius.forEach(System.out::println);
+        List<PostalCode> resultsVeryLargeRadius = controller.nearbyLocations(from, 1000);
+        printPostalCodeList(resultsVeryLargeRadius);
 
         // Test with a radius that should cover all locations
         System.out.println("\nTest 5: Max Radius (5000 km)");
-        List<String> resultsMaxRadius = controller.nearbyLocations(from, 5000);
-        resultsMaxRadius.forEach(System.out::println);
+        List<PostalCode> resultsMaxRadius = controller.nearbyLocations(from, 5000);
+        printPostalCodeList(resultsMaxRadius);
 
         // Test with a postal code that does not exist
         System.out.println("\nTest 6: Non-Existent Postal Code");
-        List<String> resultsNonExistent = controller.nearbyLocations("XYZ", 100);
-        resultsNonExistent.forEach(System.out::println);
+        List<PostalCode> resultsNonExistent = controller.nearbyLocations("XYZ", 100);
+        if (resultsNonExistent.isEmpty()) {
+            System.out.println("No locations found or postal code does not exist.");
+        } else {
+            printPostalCodeList(resultsNonExistent);
+        }
     }
+
+    private static void printPostalCodeList(List<PostalCode> postalCodes) {
+        if (postalCodes.isEmpty()) {
+            System.out.println("No locations found within the specified radius.");
+            return;
+        }
+
+        for (PostalCode pc : postalCodes) {
+            System.out.printf("Postal Code: %-3s | City: %-3s | Province: %-3s | Distance: %1.2f km%n",
+                    pc.getPostalCode(), pc.getCity(), pc.getProvince(), pc.getDistanceToReference());
+        }
+    }
+
 }

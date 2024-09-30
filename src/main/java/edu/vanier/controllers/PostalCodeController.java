@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -156,22 +155,33 @@ public class PostalCodeController {
         return distance; // Return the calculated distance
     }
 
-    public List<String> nearbyLocations(String from, int radius) {
-        List<String> results = new ArrayList<>();
+    public List<PostalCode> nearbyLocations(String from, int radius) {
+        System.out.println("Entering nearbyLocations method.");
+        System.out.println("Parameters received - from: " + from + ", radius: " + radius);
+
+        List<PostalCode> results = new ArrayList<>();
         PostalCode fromPostalCode = postalCodes.get(from);
 
         if (fromPostalCode == null) {
-            results.add("The postal code does not exist in the database.");
+            System.out.println("The postal code '" + from + "' does not exist in the database.");
             return results;
         }
 
         double latitude1 = fromPostalCode.getLatitude();
         double longitude1 = fromPostalCode.getLongitude();
+        System.out.println("Reference postal code coordinates - Latitude: " + latitude1 + ", Longitude: " + longitude1);
 
-        boolean foundNearby = false;
+        int totalPostalCodes = postalCodes.size();
+        System.out.println("Total postal codes to check: " + totalPostalCodes);
+
+        int checkedPostalCodes = 0;
+        int addedPostalCodes = 0;
 
         for (PostalCode toPostalCode : postalCodes.values()) {
+            checkedPostalCodes++;
+
             if (toPostalCode.getPostalCode().equals(from)) {
+                System.out.println("Skipping same postal code: " + toPostalCode.getPostalCode());
                 continue;  // Skip the same postal code
             }
 
@@ -180,17 +190,19 @@ public class PostalCodeController {
 
             double distance = haversine(latitude1, longitude1, latitude2, longitude2);
 
+            // Log the distance calculation
+            System.out.printf("Calculated distance from %s to %s: %.2f km%n", from, toPostalCode.getPostalCode(), distance);
+
             if (distance <= radius) {
-                foundNearby = true;
-                results.add(String.format("Postal Code: %-3s | Province: %-2s | City: %-10s | Distance: %1.2f km",
-                        toPostalCode.getPostalCode(), toPostalCode.getCity(), toPostalCode.getProvince(), distance));
+                // Set the distance to the reference postal code
+                toPostalCode.setDistanceToReference(distance);
+                results.add(toPostalCode);
+                addedPostalCodes++;
+                System.out.println("Added postal code " + toPostalCode.getPostalCode() + " to results. Total added: " + addedPostalCodes);
             }
         }
 
-        if (!foundNearby) {
-            results.add("No locations found within the specified radius.");
-        }
-
+        System.out.println("Checked " + checkedPostalCodes + " postal codes.");
         return results;
     }
 

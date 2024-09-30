@@ -8,6 +8,7 @@ public class PostalCode {
     private String city;
     private double latitude;
     private double longitude;
+    private double distanceToReference;
 
     public PostalCode(String id, String country, String postalCode, String province, String city, double latitude, double longitude) {
         this.id = id;
@@ -79,6 +80,14 @@ public class PostalCode {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public double getDistanceToReference() {
+        return distanceToReference;
+    }
+
+    public void setDistanceToReference(double distanceToReference) {
+        this.distanceToReference = distanceToReference;
     }
 
     @Override
