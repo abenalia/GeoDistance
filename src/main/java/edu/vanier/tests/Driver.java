@@ -5,6 +5,10 @@ import edu.vanier.models.PostalCode;
 
 import java.util.List;
 
+/**
+ * Driver class for testing the functionality of the PostalCodeController.
+ * This class contains methods to test parsing, distance calculation, and finding nearby locations.
+ */
 public class Driver {
 
     public static void main(String[] args) {
@@ -21,6 +25,11 @@ public class Driver {
         testNearbyLocations(controller, "E2E");
     }
 
+    /**
+     * Tests the parsing functionality of the PostalCodeController.
+     *
+     * @param controller The PostalCodeController instance to be tested.
+     */
     public static void testParse(PostalCodeController controller) {
         System.out.println("Testing parse() method...");
 
@@ -59,6 +68,11 @@ public class Driver {
         }
     }
 
+    /**
+     * Tests the distance calculation between two postal codes.
+     *
+     * @param controller The PostalCodeController instance to be tested.
+     */
     public static void testDistanceTo(PostalCodeController controller) {
         // 1. Valid Input Test
         System.out.println("Valid Input Test:");
@@ -99,6 +113,12 @@ public class Driver {
         System.out.printf("Distance between X0A and X0G: %.2f km%n", boundaryDistance);
     }
 
+    /**
+     * Tests finding nearby locations for a given postal code within different radii.
+     *
+     * @param controller The PostalCodeController instance to be tested.
+     * @param from The postal code from which to search for nearby locations.
+     */
     public static void testNearbyLocations(PostalCodeController controller, String from) {
         System.out.println("Testing nearby locations for postal code: " + from);
 
@@ -137,6 +157,11 @@ public class Driver {
         }
     }
 
+    /**
+     * Helper method to print a list of postal codes with their details.
+     *
+     * @param postalCodes List of postal codes to be printed.
+     */
     private static void printPostalCodeList(List<PostalCode> postalCodes) {
         if (postalCodes.isEmpty()) {
             System.out.println("No locations found within the specified radius.");
@@ -148,5 +173,4 @@ public class Driver {
                     pc.getPostalCode(), pc.getCity(), pc.getProvince(), pc.getDistanceToReference());
         }
     }
-
 }

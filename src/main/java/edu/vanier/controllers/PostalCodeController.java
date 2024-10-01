@@ -11,14 +11,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Controller class responsible for managing and manipulating postal codes data.
+ * Handles parsing postal codes from a CSV file, validating the parsed data, calculating distances,
+ * and finding nearby locations based on a given radius.
+ */
 public class PostalCodeController {
     private final HashMap<String, PostalCode> postalCodes = new HashMap<>();
     private final String csvFilePath;
 
+    /**
+     * Constructs a PostalCodeController with the specified path to the CSV file.
+     *
+     * @param csvFilePath The path to the CSV file containing postal code data.
+     */
     public PostalCodeController(String csvFilePath) {
         this.csvFilePath = csvFilePath;
     }
 
+    /**
+     * Parses the CSV file and populates the postalCodes map with PostalCode objects.
+     * Handles incorrectly formatted lines
+     */
     public void parse() {
         try {
             CSVReader reader = new CSVReaderBuilder(new FileReader(csvFilePath)).build();
@@ -37,7 +51,6 @@ public class PostalCodeController {
                         continue;
                     }
 
-                    // Parse fields
                     String id = nextLine[0];
                     String country = nextLine[1];
                     String postalCodeStr = nextLine[2];
@@ -46,8 +59,7 @@ public class PostalCodeController {
                     double latitude = Double.parseDouble(nextLine[5]);
                     double longitude = Double.parseDouble(nextLine[6]);
 
-                    // Create PostalCode object
-                    PostalCode postalCode = new PostalCode(id, country, postalCodeStr, city, province, latitude, longitude);
+                    PostalCode postalCode = new PostalCode(id, postalCodeStr, province, city, latitude, longitude);
                     postalCodes.put(postalCodeStr, postalCode);
 
                 } catch (NumberFormatException e) {
@@ -65,19 +77,22 @@ public class PostalCodeController {
         }
     }
 
+    /**
+     * Validates the parsed postal codes by checking for valid postal code length,
+     * non-empty city and province, and valid latitude and longitude values.
+     * Logs invalid entries.
+     */
     public void validateParsedData() {
         boolean allValid = true;
 
         for (PostalCode postalCode : postalCodes.values()) {
             boolean valid = true;
 
-            // Validate postal code (length 3)
             if (postalCode.getPostalCode().length() != 3) {
                 System.out.println("Invalid Postal Code: " + postalCode.getPostalCode() + " (ID: " + postalCode.getId() + ")");
                 valid = false;
             }
 
-            // Validate non-empty city and province
             if (postalCode.getCity() == null || postalCode.getCity().isEmpty()) {
                 System.out.println("Invalid City for Postal Code: " + postalCode.getPostalCode() + " (ID: " + postalCode.getId() + ")");
                 valid = false;
@@ -87,7 +102,6 @@ public class PostalCodeController {
                 valid = false;
             }
 
-            // Validate latitude and longitude
             if (postalCode.getLatitude() < -90 || postalCode.getLatitude() > 90) {
                 System.out.println("Invalid Latitude for Postal Code: " + postalCode.getPostalCode() + " (ID: " + postalCode.getId() + ")");
                 valid = false;
@@ -109,40 +123,48 @@ public class PostalCodeController {
         }
     }
 
+    /**
+     * Attempts to fix a CSV line with more than 7 fields by merging fields into the city name.
+     *
+     * @param line The original CSV line that needs fixing.
+     * @return The fixed line with exactly 7 fields.
+     */
     private String[] fixCsvLine(String[] line) {
         if (line.length > 7) {
-            // Combine all fields from the 4th field (index 3) to the third-to-last field into a single city name
             StringBuilder cityBuilder = new StringBuilder(line[3]);
 
-            // Merge fields into the city name until we reach the last three fields (province, latitude, longitude)
             for (int i = 4; i < line.length - 3; i++) {
-                cityBuilder.append(", ").append(line[i].trim()); // Append city parts with commas
+                cityBuilder.append(", ").append(line[i].trim());
             }
 
-            // Rebuild the corrected line with exactly 7 fields
             String[] fixedLine = new String[7];
-            fixedLine[0] = line[0];  // id
-            fixedLine[1] = line[1];  // country
-            fixedLine[2] = line[2];  // postalCode
-            fixedLine[3] = cityBuilder.toString();  // merged city field
-            fixedLine[4] = line[line.length - 3];  // province
-            fixedLine[5] = line[line.length - 2];  // latitude
-            fixedLine[6] = line[line.length - 1];  // longitude
+            fixedLine[0] = line[0];
+            fixedLine[1] = line[1];
+            fixedLine[2] = line[2];
+            fixedLine[3] = cityBuilder.toString();
+            fixedLine[4] = line[line.length - 3];
+            fixedLine[5] = line[line.length - 2];
+            fixedLine[6] = line[line.length - 1];
 
             return fixedLine;
         }
-
-        // If the line already has exactly 7 fields, return as-is
         return line;
     }
 
+    /**
+     * Calculates the distance in kilometers between two postal codes using the haversine formula.
+     *
+     * @param from The postal code from which to calculate the distance.
+     * @param to   The postal code to which the distance is calculated.
+     * @return The distance in kilometers, or -1 if one or both postal codes are not found.
+     */
     public double distanceTo(String from, String to) {
         PostalCode fromCode = postalCodes.get(from);
         PostalCode toCode = postalCodes.get(to);
 
         if (fromCode == null || toCode == null) {
             System.out.println("One or both of the postal codes do not exist in the database.");
-            return -1; // Return an invalid distance if postal codes are not found
+            return -1;
         }
 
         double latitude1 = fromCode.getLatitude();
@@ -152,9 +174,16 @@ public class PostalCodeController {
 
         double distance = haversine(latitude1, longitude1, latitude2, longitude2);
 
-        return distance; // Return the calculated distance
+        return distance;
     }
 
+    /**
+     * Finds postal codes within a specified radius from a given postal code.
+     *
+     * @param from   The postal code from which to search.
+     * @param radius The radius (in kilometers) within which to find nearby postal codes.
+     * @return A list of nearby postal codes.
+     */
     public List<PostalCode> nearbyLocations(String from, int radius) {
         System.out.println("Entering nearbyLocations method.");
         System.out.println("Parameters received - from: " + from + ", radius: " + radius);
@@ -182,7 +211,7 @@ public class PostalCodeController {
 
             if (toPostalCode.getPostalCode().equals(from)) {
                 System.out.println("Skipping same postal code: " + toPostalCode.getPostalCode());
-                continue;  // Skip the same postal code
+                continue;
             }
 
             double latitude2 = toPostalCode.getLatitude();
@@ -190,11 +219,9 @@ public class PostalCodeController {
 
             double distance = haversine(latitude1, longitude1, latitude2, longitude2);
 
-            // Log the distance calculation
             System.out.printf("Calculated distance from %s to %s: %.2f km%n", from, toPostalCode.getPostalCode(), distance);
 
             if (distance <= radius) {
-                // Set the distance to the reference postal code
                 toPostalCode.setDistanceToReference(distance);
                 results.add(toPostalCode);
                 addedPostalCodes++;
@@ -206,10 +233,25 @@ public class PostalCodeController {
         return results;
     }
 
+    /**
+     * Returns the map of postal codes.
+     *
+     * @return A map of postal code strings to PostalCode objects.
+     */
     public HashMap<String, PostalCode> getPostalCodes() {
         return postalCodes;
     }
 
+    /**
+     * Haversine formula to calculate the great-circle distance between two points
+     * on the Earth's surface specified by latitude and longitude.
+     *
+     * @param latitude1  The latitude of the first point.
+     * @param longitude1 The longitude of the first point.
+     * @param latitude2  The latitude of the second point.
+     * @param longitude2 The longitude of the second point.
+     * @return The distance in kilometers between the two points.
+     */
     public static double haversine(double latitude1, double longitude1, double latitude2, double longitude2){
         double distanceLongitude = Math.toRadians(latitude2-latitude1);
         double distanceLatitude = Math.toRadians(longitude2-longitude1);

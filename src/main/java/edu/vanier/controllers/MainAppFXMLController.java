@@ -8,9 +8,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-
 import java.util.List;
 
+/**
+ * Controller class for the main application. Handles user interactions with the UI, including
+ * switching between forms, calculating distances between postal codes, and finding nearby locations.
+ */
 public class MainAppFXMLController {
 
     @FXML
@@ -20,15 +23,15 @@ public class MainAppFXMLController {
     @FXML
     private AnchorPane nearbyLocationForm;
     @FXML
-    private TextField postalCodeField1; // First postal code for distance calculation
+    private TextField postalCodeField1;
     @FXML
-    private TextField postalCodeField2; // Second postal code for distance calculation
+    private TextField postalCodeField2;
     @FXML
-    private TextField postalCodeFieldNearby; // Postal code for nearby locations
+    private TextField postalCodeFieldNearby;
     @FXML
-    private Label resultLabel; // Label to display the result
+    private Label resultLabel;
     @FXML
-    private ChoiceBox<Integer> radiusChoiceBox; // ChoiceBox for selecting the radius
+    private ChoiceBox<Integer> radiusChoiceBox;
     private PostalCodeController controller;
     @FXML
     private TableView<PostalCode> locationsTableView;
@@ -42,35 +45,41 @@ public class MainAppFXMLController {
     private TableColumn<PostalCode, Double> distanceColumn;
 
 
-    // Initialize controller
+    /**
+     * Initializes the controller after the root element has been completely processed.
+     * Sets up the CSV parser, initializes UI components, and sets default values for the ChoiceBox.
+     */
     @FXML
     public void initialize() {
-        // Initialize PostalCodeController with the path to the CSV file
         String csvFilePath = "src/main/resources/postalcodes.csv";
         controller = new PostalCodeController(csvFilePath);
         controller.parse();
 
-        // Populate the radius choice box with predefined values
         radiusChoiceBox.getItems().addAll(5, 10, 15, 25, 50, 100, 500, 1000, 2000, 5000, 10000);
-        radiusChoiceBox.setValue(10);  // Set a default value
+        radiusChoiceBox.setValue(10);
 
         postalCodeColumn.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
         cityColumn.setCellValueFactory(new PropertyValueFactory<>("city"));
         provinceColumn.setCellValueFactory(new PropertyValueFactory<>("province"));
         distanceColumn.setCellValueFactory(new PropertyValueFactory<>("distanceToReference"));
 
-        // Hide the TableView initially
         locationsTableView.setVisible(false);
     }
 
-    // Switch to Distance Form
+    /**
+     * Switches the view to the Distance Form where users can input two postal codes to calculate the distance.
+     */
     @FXML
-    private void switchToDistanceForm(ActionEvent event) {
+    private void switchToDistanceForm() {
         mainView.setVisible(false);
         distanceForm.setVisible(true);
     }
 
-    // Switch back to Main View
+    /**
+     * Switches back to the main view from any sub-form.
+     *
+     * @param event The ActionEvent triggered by a button press.
+     */
     @FXML
     private void switchToMainView(ActionEvent event) {
         mainView.setVisible(true);
@@ -78,16 +87,19 @@ public class MainAppFXMLController {
         nearbyLocationForm.setVisible(false);
     }
 
-    // Handle Submit for Distance Form
+    /**
+     * Handles the submit action for the Distance Form. Validates postal codes and calculates the
+     * distance between them using the PostalCodeController.
+     *
+     * @param event The ActionEvent triggered by the submit button.
+     */
     @FXML
     private void submitDistanceForm(ActionEvent event) {
         String postalCode1 = postalCodeField1.getText().trim();
         String postalCode2 = postalCodeField2.getText().trim();
 
-        // Regular expression for a valid postal code (Letter-Digit-Letter)
         String postalCodePattern = "^[A-Z][0-9][A-Z]$";
 
-        // Validate if postal codes are not empty and follow the pattern
         if (postalCode1.isEmpty() || postalCode2.isEmpty()) {
             resultLabel.setText("Please enter both postal codes.");
         } else if (!postalCode1.matches(postalCodePattern)) {
@@ -95,39 +107,41 @@ public class MainAppFXMLController {
         } else if (!postalCode2.matches(postalCodePattern)) {
             resultLabel.setText("Postal Code 2 is invalid. Format must be Letter-Digit-Letter (e.g., H1E).");
         } else {
-            // Use the distanceTo method from PostalCodeController to compute the distance
             double distance = controller.distanceTo(postalCode1, postalCode2);
 
-            // Check if the postal codes were found and distance is valid
             if (distance == -1) {
                 resultLabel.setText("One or both of the postal codes do not exist in the database.");
             } else {
-                // Display the result in the resultLabel
                 resultLabel.setText(String.format("The distance between %s and %s is %.2f km.", postalCode1, postalCode2, distance));
             }
         }
 
-        // Switch back to the main view and display results
         switchToMainView(event);
     }
 
-    // Switch to Nearby Locations Form
+    /**
+     * Switches the view to the Nearby Locations Form where users can input a postal code
+     * and search for nearby locations within a selected radius.
+     */
     @FXML
-    private void switchToNearbyLocationsForm(ActionEvent event) {
+    private void switchToNearbyLocationsForm() {
         mainView.setVisible(false);
         nearbyLocationForm.setVisible(true);
     }
 
-    // Handle Submit for Nearby Locations Form
+    /**
+     * Handles the submit action for the Nearby Locations Form. Validates the postal code
+     * and radius, and retrieves nearby locations from the PostalCodeController.
+     *
+     * @param event The ActionEvent triggered by the submit button.
+     */
     @FXML
     private void submitNearbyLocationsForm(ActionEvent event) {
         String postalCode = postalCodeFieldNearby.getText().trim();
         Integer radius = radiusChoiceBox.getValue();
 
-        // Regular expression for a valid postal code (Letter-Digit-Letter)
         String postalCodePattern = "^[A-Z][0-9][A-Z]$";
 
-        // Validate postal code and radius
         if (postalCode.isEmpty()) {
             resultLabel.setText("Please enter a postal code.");
         } else if (!postalCode.matches(postalCodePattern)) {
@@ -135,14 +149,12 @@ public class MainAppFXMLController {
         } else if (radius == null) {
             resultLabel.setText("Please select a radius.");
         } else {
-            // Use the nearbyLocations method from PostalCodeController to get nearby locations
             List<PostalCode> nearbyLocationsResults = controller.nearbyLocations(postalCode, radius);
 
             if (nearbyLocationsResults.isEmpty()) {
                 resultLabel.setText("No locations found within the specified radius.");
                 locationsTableView.setItems(null);
             } else {
-                // Update the distanceToReference for each PostalCode
                 for (PostalCode pc : nearbyLocationsResults) {
                     double distance = controller.distanceTo(postalCode, pc.getPostalCode());
                     pc.setDistanceToReference(distance);
@@ -150,12 +162,11 @@ public class MainAppFXMLController {
 
                 ObservableList<PostalCode> data = FXCollections.observableArrayList(nearbyLocationsResults);
                 locationsTableView.setItems(data);
-                resultLabel.setText(""); // Clear any previous messages
-                locationsTableView.setVisible(true); // Show the TableView
+                resultLabel.setText("");
+                locationsTableView.setVisible(true);
             }
         }
 
-        // Switch back to the main view
         switchToMainView(event);
     }
 }

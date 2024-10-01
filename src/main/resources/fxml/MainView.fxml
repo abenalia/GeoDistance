@@ -18,8 +18,8 @@
       <TableView fx:id="locationsTableView" layoutX="50.0" layoutY="150.0" prefHeight="200.0" prefWidth="500.0">
          <columns>
             <TableColumn fx:id="postalCodeColumn" text="Postal Code" prefWidth="100.0" />
-            <TableColumn fx:id="cityColumn" text="Province" prefWidth="50.0" />
-            <TableColumn fx:id="provinceColumn" text="City" prefWidth="300.0" />
+            <TableColumn fx:id="cityColumn" text="City" prefWidth="300.0" />
+            <TableColumn fx:id="provinceColumn" text="Province" prefWidth="50.0" />
             <TableColumn fx:id="distanceColumn" text="Distance (km)" prefWidth="100.0" />
          </columns>
       </TableView>
